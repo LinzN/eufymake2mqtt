@@ -14,6 +14,9 @@ package de.eufymake2mqtt.eufy;
 
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -74,8 +77,8 @@ public class EufyMakePrinter implements MqttCallback {
     public boolean connect() throws MqttException {
         mqttClient.connect(opts);
         mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/notice");
-        mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/command/reply");
-        mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/query/reply");
+        //mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/command/reply");
+        //mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/query/reply");
         return mqttClient.isConnected();
     }
 
@@ -94,8 +97,14 @@ public class EufyMakePrinter implements MqttCallback {
         byte[] payload = message.getPayload();
         try {
             EufyDecoder.DecodedMessage ff = EufyDecoder.decode(payload, this.aesKey);
-            System.out.println("Decoded JSON: " + ff.json);
-
+            JSONArray arr;
+            try {
+                arr = new JSONArray(ff.json.toString());
+            } catch (JSONException e) {
+                arr = new JSONArray().put(new JSONObject(ff.json.toString()));
+            }
+            System.out.println("Topic: " + topic + " Decoded JSON: " + arr.toString());
+            this.eufyManager.getEufyApp().getMirrorManager().mirror(this.serialNumber,arr);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -110,7 +119,7 @@ public class EufyMakePrinter implements MqttCallback {
         SSLContext ctx = SSLContext.getInstance("TLSv1.2");
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         Certificate caCert;
-        try (InputStream is = new FileInputStream(this.eufyManager.getSslCertificate())) {
+        try (InputStream is = new FileInputStream(this.eufyManager.getEufyConfig().getSslCertificate())) {
             caCert = cf.generateCertificate(is);
         }
 

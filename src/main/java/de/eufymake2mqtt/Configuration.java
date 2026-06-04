@@ -28,7 +28,7 @@ public class Configuration {
     public Configuration() {
         fileConfiguration = YamlConfiguration.loadConfiguration(new File("config.yml"));
         this.hostname = fileConfiguration.getString("mqtt.ip", "127.0.0.1");
-        this.port = fileConfiguration.getInt("mqtt.port", 3306);
+        this.port = fileConfiguration.getInt("mqtt.port", 1883);
         this.username = fileConfiguration.getString("mqtt.username", "your_mom");
         this.password = fileConfiguration.getString("mqtt.password", "is_so_fat");
         fileConfiguration.save();

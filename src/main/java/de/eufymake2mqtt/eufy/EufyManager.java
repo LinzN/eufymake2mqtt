@@ -12,26 +12,25 @@
 
 package de.eufymake2mqtt.eufy;
 
+import de.eufymake2mqtt.EufyApp;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
 public class EufyManager {
+    private final EufyApp eufyApp;
     private final EufyConfig eufyConfig;
     private final Map<String, EufyMakePrinter> printers;
 
     private EufyCredentials eufyCredentials;
     private File sslCertificate;
 
-    public EufyManager(){
+    public EufyManager(EufyApp eufyApp){
+        this.eufyApp = eufyApp;
         this.printers = new HashMap<>();
         this.eufyConfig = new EufyConfig();
         this.load();
@@ -56,8 +55,6 @@ public class EufyManager {
                     throw new RuntimeException(e);
                 }
             }
-        } else {
-            System.err.println("No config found!");
         }
     }
 
@@ -73,9 +70,6 @@ public class EufyManager {
                 }
             }
         }
-        else {
-            System.err.println("No config found!");
-        }
     }
 
     public void disconnect(){
@@ -87,12 +81,14 @@ public class EufyManager {
                     throw new RuntimeException(e);
                 }
             }
-        } else {
-            System.err.println("No config found!");
         }
     }
 
-    public File getSslCertificate() {
-        return sslCertificate;
+    public EufyConfig getEufyConfig() {
+        return eufyConfig;
+    }
+
+    public EufyApp getEufyApp() {
+        return eufyApp;
     }
 }

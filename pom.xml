@@ -65,7 +65,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>de.eufymake2mqtt.App</mainClass>
+                            <mainClass>de.eufymake2mqtt.EufyApp</mainClass>
                             <classpathPrefix>lib</classpathPrefix>
                         </manifest>
                     </archive>

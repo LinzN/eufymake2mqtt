@@ -13,20 +13,28 @@
 package de.eufymake2mqtt;
 
 import de.eufymake2mqtt.eufy.EufyManager;
+import de.eufymake2mqtt.mirror.MirrorManager;
 
-public class App {
+public class EufyApp {
 
     private final Configuration configuration;
     private final EufyManager eufyManager;
+    private final MirrorManager mirrorManager;
 
-    public App() {
+    public EufyApp() {
         this.configuration = new Configuration();
-        this.eufyManager = new EufyManager();
+        this.eufyManager = new EufyManager(this);
         this.eufyManager.connect();
+        this.mirrorManager = new MirrorManager(this);
+        this.mirrorManager.connect();
     }
 
     public EufyManager getEufyManager() {
         return eufyManager;
+    }
+
+    public MirrorManager getMirrorManager() {
+        return mirrorManager;
     }
 
     public Configuration getConfiguration() {
@@ -34,6 +42,6 @@ public class App {
     }
 
     public  static void main(String[] args) {
-        new App();
+        new EufyApp();
     }
 }
