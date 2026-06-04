@@ -16,20 +16,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.ankermake2mqtt</groupId>
-    <artifactId>ankermake2mqtt</artifactId>
+    <groupId>de.linzn</groupId>
+    <artifactId>eufymake2mqtt</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>AnkerMake2MQTT</name>
+    <name>EufyMake2MQTT</name>
     <description>
-        Bridges AnkerMake cloud MQTT traffic to a local MQTT broker.
+        Bridges EufyMake cloud MQTT traffic to a local MQTT broker.
         Java port of https://github.com/LinzN/ankermake2mqtt
     </description>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -40,9 +38,10 @@
             <version>1.2.5</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.16.0</version>
+            <version>3.1.4</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>de.linzn</groupId>
@@ -59,29 +58,53 @@
 
     <build>
         <plugins>
-            <!-- Shade plugin to create a fat JAR with all dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.2</version>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>de.eufymake2mqtt.App</mainClass>
+                            <classpathPrefix>lib</classpathPrefix>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <phase>process-sources</phase>
+
                         <goals>
-                            <goal>shade</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
+
                         <configuration>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>de.eufymake2mqtt.AnkerConnect</mainClass>
-                                </transformer>
-                            </transformers>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <outputDirectory>target/lib</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archiveClasses>true</archiveClasses>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>

@@ -22,11 +22,15 @@ public class Configuration {
     private final FileConfiguration fileConfiguration;
     public String hostname;
     public int port;
+    public String username;
+    public String password;
 
     public Configuration() {
         fileConfiguration = YamlConfiguration.loadConfiguration(new File("config.yml"));
-        this.hostname = fileConfiguration.getString("mqtt.hostname", "5.5.5.5");
+        this.hostname = fileConfiguration.getString("mqtt.ip", "127.0.0.1");
         this.port = fileConfiguration.getInt("mqtt.port", 3306);
+        this.username = fileConfiguration.getString("mqtt.username", "your_mom");
+        this.password = fileConfiguration.getString("mqtt.password", "is_so_fat");
         fileConfiguration.save();
     }
 

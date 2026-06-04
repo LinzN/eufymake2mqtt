@@ -12,8 +12,9 @@
 
 package de.eufymake2mqtt.eufy;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;

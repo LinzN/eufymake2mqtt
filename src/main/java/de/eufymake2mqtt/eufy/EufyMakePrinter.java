@@ -36,12 +36,14 @@ public class EufyMakePrinter implements MqttCallback {
     private final MqttClient mqttClient;
     private final EufyCredentials eufyCredentials;
     private final MqttConnectOptions opts;
+    private final EufyManager eufyManager;
 
-    public EufyMakePrinter(String serialNumber, String region, String mqttKey, EufyCredentials eufyCredentials) throws Exception {
+    public EufyMakePrinter(String serialNumber, String region, String mqttKey, EufyCredentials eufyCredentials, EufyManager eufyManager) throws Exception {
         this.serialNumber = serialNumber;
         this.region = region;
         this.aesKey = HexFormat.of().parseHex(mqttKey);
         this.eufyCredentials = eufyCredentials;
+        this.eufyManager = eufyManager;
 
         String brokerUrl = "ssl://" + (region.equalsIgnoreCase("eu") ? BROKER_HOST_EU : BROKER_HOST_US) + ":" + BROKER_PORT;
         mqttClient = new MqttClient(brokerUrl, eufyCredentials.userId() + "_" + serialNumber, new MemoryPersistence());
@@ -108,7 +110,7 @@ public class EufyMakePrinter implements MqttCallback {
         SSLContext ctx = SSLContext.getInstance("TLSv1.2");
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         Certificate caCert;
-        try (InputStream is = new FileInputStream("ssl\\ankermake_ca.pem")) {
+        try (InputStream is = new FileInputStream(this.eufyManager.getSslCertificate())) {
             caCert = cf.generateCertificate(is);
         }
 

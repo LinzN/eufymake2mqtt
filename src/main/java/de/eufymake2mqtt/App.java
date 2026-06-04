@@ -13,7 +13,6 @@
 package de.eufymake2mqtt;
 
 import de.eufymake2mqtt.eufy.EufyManager;
-import de.linzn.simplyConfiguration.FileConfiguration;
 
 public class App {
 
@@ -26,8 +25,12 @@ public class App {
         this.eufyManager.connect();
     }
 
-    public FileConfiguration getConfiguration() {
-        return configuration.getFileConfiguration();
+    public EufyManager getEufyManager() {
+        return eufyManager;
+    }
+
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
     public  static void main(String[] args) {

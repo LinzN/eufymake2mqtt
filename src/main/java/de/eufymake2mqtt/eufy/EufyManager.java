@@ -16,6 +16,11 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +29,7 @@ public class EufyManager {
     private final Map<String, EufyMakePrinter> printers;
 
     private EufyCredentials eufyCredentials;
+    private File sslCertificate;
 
     public EufyManager(){
         this.printers = new HashMap<>();
@@ -44,36 +50,49 @@ public class EufyManager {
                 String serialNumber = printer.getString("sn");
                 String mqttKey = printer.getString("mqtt_key");
                 try {
-                    EufyMakePrinter eufyMakePrinter = new EufyMakePrinter(serialNumber, region, mqttKey, eufyCredentials);
+                    EufyMakePrinter eufyMakePrinter = new EufyMakePrinter(serialNumber, region, mqttKey, eufyCredentials, this);
                     this.printers.put(serialNumber, eufyMakePrinter);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
         } else {
-            System.err.println("[EufyManager] No config found!");
+            System.err.println("No config found!");
         }
-        System.out.println(this.eufyCredentials.userId());
     }
+
     public void connect(){
-        for(EufyMakePrinter eufyMakePrinter : this.printers.values()){
-            try {
-                if(eufyMakePrinter.connect()){
-                    System.out.println("EufyMakePrinter " + eufyMakePrinter.getSerialNumber() + " connected to mqtt");
+        if(this.eufyConfig.hasConfig()) {
+            for (EufyMakePrinter eufyMakePrinter : this.printers.values()) {
+                try {
+                    if (eufyMakePrinter.connect()) {
+                        System.out.println("EufyMakePrinter " + eufyMakePrinter.getSerialNumber() + " connected to mqtt");
+                    }
+                } catch (MqttException e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (MqttException e) {
-                throw new RuntimeException(e);
             }
+        }
+        else {
+            System.err.println("No config found!");
         }
     }
 
     public void disconnect(){
-        for(EufyMakePrinter eufyMakePrinter : this.printers.values()){
-            try {
-                eufyMakePrinter.disconnect();
-            } catch (MqttException e) {
-                throw new RuntimeException(e);
+        if(this.eufyConfig.hasConfig()) {
+            for (EufyMakePrinter eufyMakePrinter : this.printers.values()) {
+                try {
+                    eufyMakePrinter.disconnect();
+                } catch (MqttException e) {
+                    throw new RuntimeException(e);
+                }
             }
+        } else {
+            System.err.println("No config found!");
         }
+    }
+
+    public File getSslCertificate() {
+        return sslCertificate;
     }
 }

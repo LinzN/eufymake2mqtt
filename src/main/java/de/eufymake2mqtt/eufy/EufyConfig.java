@@ -15,6 +15,7 @@ package de.eufymake2mqtt.eufy;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,24 +24,33 @@ import java.nio.file.Paths;
 public class EufyConfig {
 
     private JSONObject config = null;
+    private File sslCertificate;
 
     public EufyConfig(){
-        Path configDir = Paths.get("eufyConfig");
+        Path configDir = Paths.get("eufy");
         Path configFile = configDir.resolve("default.json");
+        Path sslCertificatePath = configDir.resolve("ankermake_ca.pem");
         try {
             Files.createDirectories(configDir);
+
             if(!configFile.toFile().exists()){
-                System.out.println("Error: default.json does not exist.");
+                System.out.println("Error: "+configFile.getFileName()+" does not exist.");
             } else {
                 String jsonContent = Files.readString(configFile);
                 config = new JSONObject(jsonContent);
+            }
+
+            if(!sslCertificatePath.toFile().exists()){
+                System.out.println("Error: "+sslCertificatePath.getFileName()+" does not exist.");
+            } else {
+                this.sslCertificate = sslCertificatePath.toFile();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
     public boolean hasConfig(){
-        return config != null;
+        return config != null && sslCertificate != null;
     }
 
     public JSONObject getAccountData(){
@@ -48,5 +58,9 @@ public class EufyConfig {
     }
     public JSONArray getPrinters(){
         return config.getJSONArray("printers");
+    }
+
+    public File getSslCertificate() {
+        return sslCertificate;
     }
 }
