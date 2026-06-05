@@ -19,12 +19,14 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.concurrent.Executors;
+
 import static de.eufymake2mqtt.eufy.EufyMakePrinter.*;
 
 public class MirrorManager implements MqttCallbackExtended {
 
     private final EufyApp eufyApp;
-    private final MqttClient mqttClient;
+    private final MqttAsyncClient mqttClient;
     private final MqttConnectOptions opts;
     private final String publishTopic;
 
@@ -33,7 +35,8 @@ public class MirrorManager implements MqttCallbackExtended {
         String brokerUrl = "tcp://" + this.eufyApp.getConfiguration().hostname +":" + this.eufyApp.getConfiguration().port;
         this.publishTopic = this.eufyApp.getConfiguration().mirrorTopic;
         try {
-            mqttClient = new MqttClient(brokerUrl, "eufymake2mqtt", new MemoryPersistence());
+            //mqttClient = new MqttClient(brokerUrl, "eufymake2mqtt", new MemoryPersistence());
+            mqttClient = new MqttAsyncClient(brokerUrl, "eufymake2mqtt", new MemoryPersistence(),new TimerPingSender(), Executors.newScheduledThreadPool(2));
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }
@@ -42,8 +45,9 @@ public class MirrorManager implements MqttCallbackExtended {
         opts.setCleanSession(true);
         opts.setUserName(this.eufyApp.getConfiguration().username);
         opts.setPassword(this.eufyApp.getConfiguration().password.toCharArray());
-        opts.setConnectionTimeout(10);
-        opts.setKeepAliveInterval(60);
+        opts.setConnectionTimeout(15);
+        opts.setKeepAliveInterval(30);
+        opts.setMaxReconnectDelay(30000);
         opts.setAutomaticReconnect(true);
     }
 

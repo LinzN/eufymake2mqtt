@@ -26,6 +26,7 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.util.HexFormat;
+import java.util.concurrent.Executors;
 
 public class EufyMakePrinter implements MqttCallbackExtended {
 
@@ -36,7 +37,7 @@ public class EufyMakePrinter implements MqttCallbackExtended {
     private final String serialNumber;
     private final String region;
     private final byte[] aesKey;
-    private final MqttClient mqttClient;
+    private final MqttAsyncClient mqttClient;
     private final EufyCredentials eufyCredentials;
     private final MqttConnectOptions opts;
     private final EufyManager eufyManager;
@@ -49,15 +50,17 @@ public class EufyMakePrinter implements MqttCallbackExtended {
         this.eufyManager = eufyManager;
 
         String brokerUrl = "ssl://" + (region.equalsIgnoreCase("eu") ? BROKER_HOST_EU : BROKER_HOST_US) + ":" + BROKER_PORT;
-        mqttClient = new MqttClient(brokerUrl, eufyCredentials.userId() + "_" + serialNumber, new MemoryPersistence());
+        //mqttClient = new MqttClient(brokerUrl, eufyCredentials.userId() + "_" + serialNumber, new MemoryPersistence());
+        mqttClient = new MqttAsyncClient(brokerUrl, eufyCredentials.userId() + "_" + serialNumber, new MemoryPersistence(),new TimerPingSender(), Executors.newScheduledThreadPool(2));
         mqttClient.setCallback(this);
 
         opts = new MqttConnectOptions();
         opts.setCleanSession(true);
         opts.setUserName(eufyCredentials.userId());
         opts.setPassword(eufyCredentials.password().toCharArray());
-        opts.setConnectionTimeout(10);
-        opts.setKeepAliveInterval(60);
+        opts.setConnectionTimeout(15);
+        opts.setKeepAliveInterval(30);
+        opts.setMaxReconnectDelay(30000);
         opts.setSocketFactory(buildSslContext().getSocketFactory()); // oder echtes Cert
         opts.setAutomaticReconnect(true);
     }
@@ -77,7 +80,7 @@ public class EufyMakePrinter implements MqttCallbackExtended {
 
     public boolean connect() throws MqttException {
         mqttClient.connect(opts);
-        mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/notice");
+        mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/notice", 1);
         //mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/command/reply");
         //mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/query/reply");
         return mqttClient.isConnected();
@@ -121,7 +124,7 @@ public class EufyMakePrinter implements MqttCallbackExtended {
         if (reconnect) {
             System.out.println("Reconnected to EufyMake cloud:" + this.serialNumber);
             try {
-                mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/notice");
+                mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/notice", 1);
             } catch (MqttException e) {
                 throw new RuntimeException(e);
             }

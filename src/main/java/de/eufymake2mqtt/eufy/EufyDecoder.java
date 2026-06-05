@@ -33,7 +33,7 @@ public class EufyDecoder {
             throws Exception {
 
         if (xorBytes(mqttPacket) != 0) {
-            System.out.println("WARNUNG: MQTT Checksumme ungültig");
+            System.out.println("Imvalid mqtt checksum");
         }
 
         byte[] packet = Arrays.copyOf(mqttPacket, mqttPacket.length - 1);
@@ -78,7 +78,7 @@ public class EufyDecoder {
         String sig = new String(signature, StandardCharsets.US_ASCII);
         if (!"MA".equals(sig)) {
             throw new IllegalArgumentException(
-                    "Ungültige Signatur: " + sig);
+                    "Invalid signature: " + sig);
         }
 
         DecodedMessage msg = new DecodedMessage();
