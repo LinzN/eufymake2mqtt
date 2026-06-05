@@ -31,7 +31,7 @@ public class MirrorManager implements MqttCallbackExtended {
         String brokerUrl = "tcp://" + this.eufyApp.getConfiguration().hostname + ":" + this.eufyApp.getConfiguration().port;
         this.publishTopic = this.eufyApp.getConfiguration().mirrorTopic;
         try {
-            mqttClient = new MqttClient(brokerUrl, "eufymake2mqtt", new MemoryPersistence(), Executors.newScheduledThreadPool(2));
+            mqttClient = new MqttClient(brokerUrl, "eufymake2mqtt", new MemoryPersistence());
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }
