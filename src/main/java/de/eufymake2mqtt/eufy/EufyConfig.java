@@ -12,19 +12,22 @@
 
 package de.eufymake2mqtt.eufy;
 
+import de.eufymake2mqtt.EufyApp;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class EufyConfig {
 
     private JSONObject config = null;
-    private File sslCertificate;
+    private final File sslCertificate;
 
     public EufyConfig(){
         Path configDir = Paths.get("eufy");
@@ -41,7 +44,16 @@ public class EufyConfig {
             }
 
             if(!sslCertificatePath.toFile().exists()){
-                System.out.println("Error: "+sslCertificatePath.getFileName()+" does not exist.");
+                System.out.println("Certificate "+sslCertificatePath.getFileName()+" does not exist. Extracting...");
+
+                try (InputStream in = EufyApp.class.getResourceAsStream("/"+sslCertificatePath.getFileName())) {
+                    if (in == null) {
+                        throw new IllegalStateException("Resource not found: " + sslCertificatePath.getFileName());
+                    }
+
+                    Files.copy(in, sslCertificatePath, StandardCopyOption.REPLACE_EXISTING);
+                    this.sslCertificate = sslCertificatePath.toFile();
+                }
             } else {
                 this.sslCertificate = sslCertificatePath.toFile();
             }
