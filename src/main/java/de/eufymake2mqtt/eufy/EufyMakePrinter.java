@@ -27,7 +27,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.util.HexFormat;
 
-public class EufyMakePrinter implements MqttCallback {
+public class EufyMakePrinter implements MqttCallbackExtended {
 
     private static final String BROKER_HOST_EU = "make-mqtt-eu.ankermake.com";
     private static final String BROKER_HOST_US = "make-mqtt.ankermake.com";
@@ -114,6 +114,18 @@ public class EufyMakePrinter implements MqttCallback {
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
 
+    }
+
+    @Override
+    public void connectComplete(boolean reconnect, String serverURI) {
+        if (reconnect) {
+            System.out.println("Reconnected to EufyMake cloud:" + this.serialNumber);
+            try {
+                mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/notice");
+            } catch (MqttException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private SSLContext buildSslContext() throws Exception {

@@ -21,7 +21,7 @@ import org.json.JSONObject;
 
 import static de.eufymake2mqtt.eufy.EufyMakePrinter.*;
 
-public class MirrorManager implements MqttCallback {
+public class MirrorManager implements MqttCallbackExtended {
 
     private final EufyApp eufyApp;
     private final MqttClient mqttClient;
@@ -38,7 +38,6 @@ public class MirrorManager implements MqttCallback {
             throw new RuntimeException(e);
         }
         mqttClient.setCallback(this);
-
         opts = new MqttConnectOptions();
         opts.setCleanSession(true);
         opts.setUserName(this.eufyApp.getConfiguration().username);
@@ -86,5 +85,12 @@ public class MirrorManager implements MqttCallback {
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
 
+    }
+
+    @Override
+    public void connectComplete(boolean reconnect, String serverURI) {
+        if (reconnect) {
+            System.out.println("Reconnected to local mqtt broker for mirroring!");
+        }
     }
 }
