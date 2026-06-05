@@ -29,22 +29,22 @@ public class EufyManager {
     private EufyCredentials eufyCredentials;
     private File sslCertificate;
 
-    public EufyManager(EufyApp eufyApp){
+    public EufyManager(EufyApp eufyApp) {
         this.eufyApp = eufyApp;
         this.printers = new HashMap<>();
         this.eufyConfig = new EufyConfig();
         this.load();
     }
 
-    private void load(){
-        if(this.eufyConfig.hasConfig()){
+    private void load() {
+        if (this.eufyConfig.hasConfig()) {
             String userId = this.eufyConfig.getAccountData().getString("user_id");
             String email = this.eufyConfig.getAccountData().getString("email");
             String region = this.eufyConfig.getAccountData().getString("region");
             this.eufyCredentials = new EufyCredentials("eufy_" + userId, email);
 
             JSONArray jsonPrinters = this.eufyConfig.getPrinters();
-            for(int i = 0; i < jsonPrinters.length(); i++){
+            for (int i = 0; i < jsonPrinters.length(); i++) {
                 JSONObject printer = jsonPrinters.getJSONObject(i);
                 String serialNumber = printer.getString("sn");
                 String mqttKey = printer.getString("mqtt_key");
@@ -58,8 +58,8 @@ public class EufyManager {
         }
     }
 
-    public void connect(){
-        if(this.eufyConfig.hasConfig()) {
+    public void connect() {
+        if (this.eufyConfig.hasConfig()) {
             for (EufyMakePrinter eufyMakePrinter : this.printers.values()) {
                 try {
                     if (eufyMakePrinter.connect()) {
@@ -72,8 +72,8 @@ public class EufyManager {
         }
     }
 
-    public void disconnect(){
-        if(this.eufyConfig.hasConfig()) {
+    public void disconnect() {
+        if (this.eufyConfig.hasConfig()) {
             for (EufyMakePrinter eufyMakePrinter : this.printers.values()) {
                 try {
                     eufyMakePrinter.disconnect();

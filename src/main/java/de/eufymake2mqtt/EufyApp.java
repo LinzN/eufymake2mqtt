@@ -29,6 +29,10 @@ public class EufyApp {
         this.mirrorManager.connect();
     }
 
+    public static void main(String[] args) {
+        new EufyApp();
+    }
+
     public EufyManager getEufyManager() {
         return eufyManager;
     }
@@ -39,9 +43,5 @@ public class EufyApp {
 
     public Configuration getConfiguration() {
         return configuration;
-    }
-
-    public  static void main(String[] args) {
-        new EufyApp();
     }
 }

@@ -13,30 +13,25 @@
 package de.eufymake2mqtt.mirror;
 
 import de.eufymake2mqtt.EufyApp;
-import de.eufymake2mqtt.eufy.EufyCredentials;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.concurrent.Executors;
-
-import static de.eufymake2mqtt.eufy.EufyMakePrinter.*;
 
 public class MirrorManager implements MqttCallbackExtended {
 
     private final EufyApp eufyApp;
-    private final MqttAsyncClient mqttClient;
+    private final MqttClient mqttClient;
     private final MqttConnectOptions opts;
     private final String publishTopic;
 
     public MirrorManager(EufyApp eufyApp) {
         this.eufyApp = eufyApp;
-        String brokerUrl = "tcp://" + this.eufyApp.getConfiguration().hostname +":" + this.eufyApp.getConfiguration().port;
+        String brokerUrl = "tcp://" + this.eufyApp.getConfiguration().hostname + ":" + this.eufyApp.getConfiguration().port;
         this.publishTopic = this.eufyApp.getConfiguration().mirrorTopic;
         try {
-            //mqttClient = new MqttClient(brokerUrl, "eufymake2mqtt", new MemoryPersistence());
-            mqttClient = new MqttAsyncClient(brokerUrl, "eufymake2mqtt", new MemoryPersistence(),new TimerPingSender(), Executors.newScheduledThreadPool(2));
+            mqttClient = new MqttClient(brokerUrl, "eufymake2mqtt", new MemoryPersistence(), Executors.newScheduledThreadPool(2));
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }
@@ -51,22 +46,22 @@ public class MirrorManager implements MqttCallbackExtended {
         opts.setAutomaticReconnect(true);
     }
 
-    public void connect(){
+    public void connect() {
         try {
             mqttClient.connect(opts);
         } catch (MqttException e) {
             throw new RuntimeException(e);
         }
-        if(mqttClient.isConnected()){
+        if (mqttClient.isConnected()) {
             System.out.println("Connected to local mqtt broker for mirroring!");
         }
     }
 
-    public void mirror(String printerSerial, JSONArray jsonArray){
+    public void mirror(String printerSerial, JSONArray jsonArray) {
         MqttMessage mqttMessage = new MqttMessage();
         mqttMessage.setPayload(jsonArray.toString().getBytes());
         mqttMessage.setQos(1);
-        if(this.mqttClient.isConnected()) {
+        if (this.mqttClient.isConnected()) {
             try {
                 System.out.println("Mirror data to " + this.publishTopic.replace("{serial}", printerSerial));
                 this.mqttClient.publish(this.publishTopic.replace("{serial}", printerSerial), mqttMessage);
@@ -78,7 +73,7 @@ public class MirrorManager implements MqttCallbackExtended {
 
     @Override
     public void connectionLost(Throwable cause) {
-        System.out.println("Connection lost to local mqtt broker for mirroring!" +  cause.getMessage());
+        System.out.println("Connection lost to local mqtt broker for mirroring!" + cause.getMessage());
     }
 
     @Override

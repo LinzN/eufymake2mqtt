@@ -37,7 +37,7 @@ public class EufyMakePrinter implements MqttCallbackExtended {
     private final String serialNumber;
     private final String region;
     private final byte[] aesKey;
-    private final MqttAsyncClient mqttClient;
+    private final MqttClient mqttClient;
     private final EufyCredentials eufyCredentials;
     private final MqttConnectOptions opts;
     private final EufyManager eufyManager;
@@ -50,8 +50,7 @@ public class EufyMakePrinter implements MqttCallbackExtended {
         this.eufyManager = eufyManager;
 
         String brokerUrl = "ssl://" + (region.equalsIgnoreCase("eu") ? BROKER_HOST_EU : BROKER_HOST_US) + ":" + BROKER_PORT;
-        //mqttClient = new MqttClient(brokerUrl, eufyCredentials.userId() + "_" + serialNumber, new MemoryPersistence());
-        mqttClient = new MqttAsyncClient(brokerUrl, eufyCredentials.userId() + "_" + serialNumber, new MemoryPersistence(),new TimerPingSender(), Executors.newScheduledThreadPool(2));
+        mqttClient = new MqttClient(brokerUrl, eufyCredentials.userId() + "_" + serialNumber, new MemoryPersistence(), Executors.newScheduledThreadPool(2));
         mqttClient.setCallback(this);
 
         opts = new MqttConnectOptions();
@@ -108,7 +107,7 @@ public class EufyMakePrinter implements MqttCallbackExtended {
                 arr = new JSONArray().put(new JSONObject(ff.json.toString()));
             }
             System.out.println("Topic: " + topic + " Decoded JSON: " + arr.toString());
-            this.eufyManager.getEufyApp().getMirrorManager().mirror(this.serialNumber,arr);
+            this.eufyManager.getEufyApp().getMirrorManager().mirror(this.serialNumber, arr);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -125,6 +124,7 @@ public class EufyMakePrinter implements MqttCallbackExtended {
             System.out.println("Reconnected to EufyMake cloud:" + this.serialNumber);
         }
         try {
+            System.out.println("Subscribing to topics for " + this.serialNumber);
             mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/notice", 1);
         } catch (MqttException e) {
             throw new RuntimeException(e);
