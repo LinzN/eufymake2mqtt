@@ -80,7 +80,7 @@ public class EufyMakePrinter implements MqttCallbackExtended {
 
     public boolean connect() throws MqttException {
         mqttClient.connect(opts);
-        mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/notice", 1);
+        //mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/notice", 1);
         //mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/command/reply");
         //mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/query/reply");
         return mqttClient.isConnected();
@@ -123,11 +123,11 @@ public class EufyMakePrinter implements MqttCallbackExtended {
     public void connectComplete(boolean reconnect, String serverURI) {
         if (reconnect) {
             System.out.println("Reconnected to EufyMake cloud:" + this.serialNumber);
-            try {
-                mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/notice", 1);
-            } catch (MqttException e) {
-                throw new RuntimeException(e);
-            }
+        }
+        try {
+            mqttClient.subscribe("/phone/maker/" + this.serialNumber + "/notice", 1);
+        } catch (MqttException e) {
+            throw new RuntimeException(e);
         }
     }
 
