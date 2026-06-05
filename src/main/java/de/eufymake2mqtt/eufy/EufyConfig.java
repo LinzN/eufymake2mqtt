@@ -26,27 +26,20 @@ import java.nio.file.StandardCopyOption;
 
 public class EufyConfig {
 
-    private JSONObject config = null;
     private final File sslCertificate;
+    private JSONObject config = null;
 
-    public EufyConfig(){
+    public EufyConfig() {
         Path configDir = Paths.get("eufy");
         Path configFile = configDir.resolve("default.json");
         Path sslCertificatePath = configDir.resolve("ankermake_ca.pem");
         try {
             Files.createDirectories(configDir);
 
-            if(!configFile.toFile().exists()){
-                System.out.println("Error: "+configFile.getFileName()+" does not exist.");
-            } else {
-                String jsonContent = Files.readString(configFile);
-                config = new JSONObject(jsonContent);
-            }
+            if (!sslCertificatePath.toFile().exists()) {
+                System.out.println("Certificate " + sslCertificatePath.getFileName() + " does not exist. Extracting...");
 
-            if(!sslCertificatePath.toFile().exists()){
-                System.out.println("Certificate "+sslCertificatePath.getFileName()+" does not exist. Extracting...");
-
-                try (InputStream in = EufyApp.class.getResourceAsStream("/"+sslCertificatePath.getFileName())) {
+                try (InputStream in = EufyApp.class.getResourceAsStream("/" + sslCertificatePath.getFileName())) {
                     if (in == null) {
                         throw new IllegalStateException("Resource not found: " + sslCertificatePath.getFileName());
                     }
@@ -57,18 +50,27 @@ public class EufyConfig {
             } else {
                 this.sslCertificate = sslCertificatePath.toFile();
             }
+
+            if (!configFile.toFile().exists()) {
+                System.out.println("Error: " + configFile.getFileName() + " does not exist.");
+            } else {
+                String jsonContent = Files.readString(configFile);
+                config = new JSONObject(jsonContent);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    public boolean hasConfig(){
+
+    public boolean hasConfig() {
         return config != null && sslCertificate != null;
     }
 
-    public JSONObject getAccountData(){
+    public JSONObject getAccountData() {
         return config.getJSONObject("account");
     }
-    public JSONArray getPrinters(){
+
+    public JSONArray getPrinters() {
         return config.getJSONArray("printers");
     }
 

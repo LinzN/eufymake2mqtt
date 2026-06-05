@@ -26,10 +26,12 @@ public class MirrorManager implements MqttCallback {
     private final EufyApp eufyApp;
     private final MqttClient mqttClient;
     private final MqttConnectOptions opts;
+    private final String publishTopic;
 
     public MirrorManager(EufyApp eufyApp) {
         this.eufyApp = eufyApp;
         String brokerUrl = "tcp://" + this.eufyApp.getConfiguration().hostname +":" + this.eufyApp.getConfiguration().port;
+        this.publishTopic = this.eufyApp.getConfiguration().mirrorTopic;
         try {
             mqttClient = new MqttClient(brokerUrl, "eufymake2mqtt", new MemoryPersistence());
         } catch (MqttException e) {
@@ -43,6 +45,7 @@ public class MirrorManager implements MqttCallback {
         opts.setPassword(this.eufyApp.getConfiguration().password.toCharArray());
         opts.setConnectionTimeout(10);
         opts.setKeepAliveInterval(60);
+        opts.setAutomaticReconnect(true);
     }
 
     public void connect(){
@@ -62,7 +65,8 @@ public class MirrorManager implements MqttCallback {
         mqttMessage.setQos(1);
         if(this.mqttClient.isConnected()) {
             try {
-                this.mqttClient.publish("eufymake2mqtt/printers/"+printerSerial+"/data", mqttMessage);
+                System.out.println("Mirror data to " + this.publishTopic.replace("{serial}", printerSerial));
+                this.mqttClient.publish(this.publishTopic.replace("{serial}", printerSerial), mqttMessage);
             } catch (MqttException e) {
                 throw new RuntimeException(e);
             }
@@ -71,7 +75,7 @@ public class MirrorManager implements MqttCallback {
 
     @Override
     public void connectionLost(Throwable cause) {
-
+        System.out.println("Connection lost to local mqtt broker for mirroring!" +  cause.getMessage());
     }
 
     @Override

@@ -59,6 +59,7 @@ public class EufyMakePrinter implements MqttCallback {
         opts.setConnectionTimeout(10);
         opts.setKeepAliveInterval(60);
         opts.setSocketFactory(buildSslContext().getSocketFactory()); // oder echtes Cert
+        opts.setAutomaticReconnect(true);
     }
 
 
@@ -89,7 +90,7 @@ public class EufyMakePrinter implements MqttCallback {
 
     @Override
     public void connectionLost(Throwable cause) {
-        System.out.println("Lost connection to Eufymake cloud:" + this.serialNumber + " " + cause.getMessage());
+        System.out.println("Lost connection to EufyMake cloud:" + this.serialNumber + " " + cause.getMessage());
     }
 
     @Override

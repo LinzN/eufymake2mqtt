@@ -24,6 +24,7 @@ public class Configuration {
     public int port;
     public String username;
     public String password;
+    public String mirrorTopic;
 
     public Configuration() {
         fileConfiguration = YamlConfiguration.loadConfiguration(new File("config.yml"));
@@ -31,6 +32,7 @@ public class Configuration {
         this.port = fileConfiguration.getInt("mqtt.port", 1883);
         this.username = fileConfiguration.getString("mqtt.username", "your_mom");
         this.password = fileConfiguration.getString("mqtt.password", "is_so_fat");
+        this.mirrorTopic = fileConfiguration.getString("mqtt.publishTopic", "eufymake2mqtt/printers/{serial}/data");
         fileConfiguration.save();
     }
 
